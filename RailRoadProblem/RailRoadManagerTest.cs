@@ -137,7 +137,7 @@ namespace RailRoadProblem
 
             var shortRoutes = railRoadManager.GetListOfPathsWithPathNodesDistanceLower(30, allRoads);
 
-            Assert.AreEqual(7, shortRoutes.Count());
+            Assert.AreEqual(3, shortRoutes.Count());
 
         }
 
