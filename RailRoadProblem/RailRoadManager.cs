@@ -16,13 +16,13 @@ namespace RailRoadProblem
         }
 
 
-        public List<Route> GetRoutes(Point route, Point startPoint, Point endPoint)
+        public IEnumerable<Route> GetRoutes(IRouteCalculateCommand command)
         {
-            return _pathCalculator.Calculate(route, startPoint, endPoint);
+            return _pathCalculator.Calculate(command);
         }
 
 
-        public Route GetShortestRoute(List<Route> paths)
+        public Route GetShortestRoute(IEnumerable<Route> paths)
         {
             var orderedPaths = paths.OrderBy(GetRouteDistance);
 

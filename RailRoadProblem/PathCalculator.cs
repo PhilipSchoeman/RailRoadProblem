@@ -5,120 +5,130 @@ namespace RailRoadProblem
 {
     public class PathCalculator : IPathCalculator
     {
-        public List<Route> Calculate(Point topLevelNode, 
-                                    Point startPoint, 
-                                    Point endPoint)
+      
+        public List<Route> Calculate(IRouteCalculateCommand command)
         {
-            var pointsDone = new List<Point>();
+            var pathRoutes = new PathRoutes();
 
-            var pathList = new List<Route>();
+            pathRoutes.PathList.Add(new Route { PathNodes = new List<PathNode> { new PathNode(command.StartPoint, 0) } });
 
-            var completedPaths = new List<Route>();
+            ExecuteMainPathFindingLoop(command, pathRoutes);
 
-            pathList.Add(new Route(){PathNodes = new List<PathNode>(){new PathNode(startPoint,0)}});
-
-            ExecuteMainPathFindingLoop(startPoint, endPoint, pathList, completedPaths, pointsDone);
-
-            return completedPaths;
+            return pathRoutes.CompletedPaths;
         }
 
+
         #region Private Methods
-        private void ExecuteMainPathFindingLoop(Point startPoint,
-                                                Point endPoint,
-                                                List<Route> pathList, 
-                                                List<Route> completedPaths, 
-                                                List<Point> pointsDone)
+        private void ExecuteMainPathFindingLoop(IRouteCalculateCommand command,
+                                                PathRoutes pathRoutes)
         {
-            while (pathList.Count > 0)
+            while (pathRoutes.PathList.Count > 0)
             {
-                var tempPathList = new List<Route>(pathList);
+                pathRoutes.TempPathList = new List<Route>(pathRoutes.PathList);
 
-                HandlePath(startPoint,endPoint, pathList, completedPaths, tempPathList, pointsDone);
+                HandlePath(command, pathRoutes);
 
-                pathList = new List<Route>(tempPathList);
+                pathRoutes.PathList = new List<Route>(pathRoutes.TempPathList);
             }
         }
 
 
-        private void HandlePath(Point startPoint,
-                                Point endPoint,
-                                List<Route> pathList,
-                                List<Route> completedPaths,
-                                List<Route> tempPathList, 
-                                List<Point> pointsDone)
+        private void HandlePath(IRouteCalculateCommand command,
+                                PathRoutes pathRoutes)
         {
-            foreach (var path in pathList)
+            foreach (var path in pathRoutes.PathList)
             {
                 var point = path.PathNodes.Last().ChildPoint;
 
+                pathRoutes.Path = path;
+
                 foreach (var childPoint in point.Children)
                 {
-                    HandlePointChild(startPoint,endPoint, childPoint, path, completedPaths, tempPathList, pointsDone);
+                    pathRoutes.ChildPoint = childPoint;
+
+                    HandlePointChild(command, pathRoutes);
                 }
             }
         }
 
 
-        private void HandlePointChild(Point startPoint,
-                                      Point endPoint,
-                                      PathNode childPoint,
-                                      Route path,
-                                      List<Route> completedPaths,
-                                      List<Route> tempPathList,
-                                      List<Point> pointsDone)
+        private void HandlePointChild(IRouteCalculateCommand command,
+                                      PathRoutes pathRoutes)
            
         {
-            if (childPoint.ChildPoint.Name == endPoint.Name)
+            if (command.ForceLoopingCount <= pathRoutes.CompletedPaths.Count && command.ForceLooping)
             {
-                HandleEndOfLine(path, childPoint, completedPaths, tempPathList);
+                pathRoutes.TempPathList.Clear();
+                return;
             }
 
+            if (pathRoutes.ChildPoint.ChildPoint.Name == command.EndPoint.Name)
+            {
+                HandleEndOfLine(command, pathRoutes);
 
-            else if (childPoint.ChildPoint.Children.Count < 1 || childPoint.ChildPoint.Name == startPoint.Name)
-            {
-                tempPathList.Remove(path);
             }
-            else if (path.PathNodes.All(x => x.ChildPoint.Name != childPoint.ChildPoint.Name))
+            else if (pathRoutes.ChildPoint.ChildPoint.Children.Count < 1 || pathRoutes.ChildPoint.ChildPoint.Name == command.StartPoint.Name)
             {
-                HandlePoint(path, childPoint, pointsDone, tempPathList);
+                pathRoutes.TempPathList.Remove(pathRoutes.Path);
+            }
+            else if (pathRoutes.Path.PathNodes.All(x => x.ChildPoint.Name != pathRoutes.ChildPoint.ChildPoint.Name) || command.ForceLooping)
+            {
+                HandlePoint(pathRoutes);
             }
         }
 
 
-        private static void HandlePoint(Route path,
-                                        PathNode childPoint, 
-                                        List<Point> pointsDone, 
-                                        List<Route> tempPathList)
+        private static void HandlePoint(PathRoutes pathRoutes)
         {
-            var newPath = new Route(path.PathNodes);
+            var newPath = new Route(pathRoutes.Path.PathNodes);
 
-            newPath.PathNodes.Add(childPoint);
+            newPath.PathNodes.Add(pathRoutes.ChildPoint);
 
-            pointsDone.Add(childPoint.ChildPoint);
+            pathRoutes.TempPathList.Add(newPath);
 
-            tempPathList.Add(newPath);
-
-            tempPathList.Remove(path);
+            pathRoutes.TempPathList.Remove(pathRoutes.Path);
         }
 
 
-        private void HandleEndOfLine(Route path,
-                                    PathNode childPoint,
-                                    List<Route> completedPaths, 
-                                    List<Route> tempPathList)
+        private void HandleEndOfLine(IRouteCalculateCommand command,
+                                     PathRoutes pathRoutes)
         {
-            var completedPath = new Route(path.PathNodes);
+            var completedPath = new Route(pathRoutes.Path.PathNodes);
 
-            completedPath.PathNodes.Add(childPoint);
+            completedPath.PathNodes.Add(pathRoutes.ChildPoint);
 
-            completedPaths.Add(completedPath);
+            pathRoutes.CompletedPaths.Add(completedPath);
 
-            tempPathList.Remove(path);
+
+            if (!command.ForceLooping)
+            {
+                pathRoutes.TempPathList.Remove(pathRoutes.Path);
+            }
+            else
+            {
+                HandlePoint(pathRoutes);
+            }
         }
 
 
        
 
         #endregion
+
     }
+
+    internal class PathRoutes
+    {
+        public List<Route> PathList = new List<Route>();
+
+        public List<Route> CompletedPaths = new List<Route>();
+
+        public Route Path = new Route();
+
+        public PathNode ChildPoint;
+
+        public List<Route> TempPathList = new List<Route>();
+    }
+
+
 }

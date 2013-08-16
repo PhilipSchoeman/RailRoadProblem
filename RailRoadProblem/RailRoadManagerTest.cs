@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -15,8 +14,20 @@ namespace RailRoadProblem
 
             var routeData = new TestData();
 
-            var allRoads = railRoadManager.GetRoutes(routeData.GetTestRailRoad(), routeData.GetPointByName("C"), routeData.GetPointByName("C"));
+            var command = new RouteCalculateCommand
+                {
+                    StartPoint = routeData.GetPointByName("C"),
+
+                    EndPoint = routeData.GetPointByName("C"),
+
+                    Route = routeData.GetTestRailRoad()
+                };
+
+            var allRoads = railRoadManager.GetRoutes(command);
+
+            Assert.Equals(3, allRoads.Count());
         }
+
 
         [TestMethod]
         public void TestDistanceRouteAbc()
@@ -85,7 +96,16 @@ namespace RailRoadProblem
 
             var routeData = new TestData();
 
-            var allRoads = railRoadManager.GetRoutes(routeData.GetTestRailRoad(), routeData.GetPointByName("C"), routeData.GetPointByName("C"));
+            var command = new RouteCalculateCommand
+                {
+                    StartPoint = routeData.GetPointByName("C"),
+
+                    EndPoint = routeData.GetPointByName("C"),
+
+                    Route = routeData.GetTestRailRoad()
+                };
+
+            var allRoads = railRoadManager.GetRoutes(command);
 
             var smallRoutes = railRoadManager.GetListOfPathsWithPathNodesLower(5, allRoads); //Including start and end nodes
 
@@ -99,7 +119,16 @@ namespace RailRoadProblem
 
             var routeData = new TestData();
 
-            var allRoads = railRoadManager.GetRoutes(routeData.GetTestRailRoad(), routeData.GetPointByName("A"), routeData.GetPointByName("C"));
+            var command = new RouteCalculateCommand
+                {
+                    StartPoint = routeData.GetPointByName("A"),
+
+                    EndPoint = routeData.GetPointByName("C"),
+
+                    Route = routeData.GetTestRailRoad()
+                };
+
+            var allRoads = railRoadManager.GetRoutes(command);
 
             var shortesRoute = railRoadManager.GetShortestRoute(allRoads);
 
@@ -116,7 +145,18 @@ namespace RailRoadProblem
 
             var routeData = new TestData();
 
-            var allRoads = railRoadManager.GetRoutes(routeData.GetTestRailRoad(), routeData.GetPointByName("B"), routeData.GetPointByName("B"));
+            var command = new RouteCalculateCommand
+                {
+                    StartPoint = routeData.GetPointByName("B"),
+
+                    EndPoint = routeData.GetPointByName("B"),
+
+                    ForceLoopingCount = 0,
+
+                    Route = routeData.GetTestRailRoad()
+                };
+
+            var allRoads = railRoadManager.GetRoutes(command);
 
             var shortesRoute = railRoadManager.GetShortestRoute(allRoads);
 
@@ -133,11 +173,22 @@ namespace RailRoadProblem
 
             var routeData = new TestData();
 
-            var allRoads = railRoadManager.GetRoutes(routeData.GetTestRailRoad(), routeData.GetPointByName("C"), routeData.GetPointByName("C"));
+            var command = new RouteCalculateCommand
+            {
+                StartPoint = routeData.GetPointByName("C"),
+
+                EndPoint = routeData.GetPointByName("C"),
+
+                ForceLoopingCount = 10,
+
+                Route = routeData.GetTestRailRoad()
+            };
+
+            var allRoads = railRoadManager.GetRoutes(command);
 
             var shortRoutes = railRoadManager.GetListOfPathsWithPathNodesDistanceLower(30, allRoads);
 
-            Assert.AreEqual(3, shortRoutes.Count());
+            Assert.AreEqual(6, shortRoutes.Count());
 
         }
 

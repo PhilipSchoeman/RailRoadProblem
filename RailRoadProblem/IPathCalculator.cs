@@ -4,6 +4,6 @@ namespace RailRoadProblem
 {
     public interface IPathCalculator
     {
-        List<Route> Calculate(Point topLevelNode, Point startPoint, Point endPoint);
+        List<Route> Calculate(IRouteCalculateCommand command);
     }
 }

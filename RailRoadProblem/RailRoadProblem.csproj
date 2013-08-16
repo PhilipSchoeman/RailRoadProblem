@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="IPathCalculator.cs" />
     <Compile Include="IRailRoadManager.cs" />
+    <Compile Include="IRouteCalculateCommand.cs" />
     <Compile Include="Path.cs" />
     <Compile Include="PathCalculator.cs" />
     <Compile Include="PathNode.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="RailRoadManager.cs" />
     <Compile Include="RailRoadManagerTest.cs" />
     <Compile Include="Route.cs" />
+    <Compile Include="RouteCalculateCommand.cs" />
     <Compile Include="TestData.cs" />
   </ItemGroup>
   <Choose>
